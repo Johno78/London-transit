@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="My Transit"/>
+  <meta name="theme-color" content="#0a0a14"/>
+  <title>My London Transit</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+<div id="app">
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="roundel"><div class="roundel-bar"></div></div>
+      <div class="header-text">
+        <h1>My London Transit</h1>
+        <p class="header-sub" id="header-sub">Live · TfL</p>
+      </div>
+      <div class="header-right">
+        <span class="clock" id="clock">--:--</span>
+        <div class="api-dot" id="api-dot" title="TfL API"></div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="App.tab('plan',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6l9-3 9 3v12l-9 3-9-3z"/><path d="M12 3v18"/></svg>Plan
+    </button>
+    <button class="tab-btn" onclick="App.tab('status',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>Status
+    </button>
+    <button class="tab-btn" onclick="App.tab('nearby',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Nearby
+    </button>
+    <button class="tab-btn" onclick="App.tab('explore',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>Explore
+    </button>
+    <button class="tab-btn" onclick="App.tab('oyster',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Oyster
+    </button>
+  </nav>
+
+  <main class="panels">
+
+    <!-- ══ PLAN ══ -->
+    <section class="panel active" id="panel-plan">
+      <div class="search-card">
+        <div class="search-row">
+          <div class="search-dot origin-dot"></div>
+          <input id="from-input" class="search-input" placeholder="From…" value="King's Cross St. Pancras" autocomplete="off"/>
+        </div>
+        <div class="search-divider">
+          <div class="search-line"></div>
+          <button class="swap-btn" onclick="App.swap()" aria-label="Swap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+          </button>
+        </div>
+        <div class="search-row">
+          <div class="search-dot dest-dot"></div>
+          <input id="to-input" class="search-input" placeholder="To…" autocomplete="off"/>
+        </div>
+      </div>
+      <div class="time-row">
+        <select id="time-type" class="time-select">
+          <option value="departing">Departing now</option>
+          <option value="arriving">Arriving by</option>
+        </select>
+        <input type="time" id="time-val" class="time-input" value=""/>
+      </div>
+      <button class="plan-btn" onclick="App.plan()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Plan journey
+      </button>
+      <div id="plan-loading" class="loading-state" style="display:none"><div class="spinner"></div><p>Finding routes…</p></div>
+      <div id="plan-error" class="error-state" style="display:none"></div>
+      <div id="route-results"></div>
+      <div id="step-view" style="display:none"></div>
+    </section>
+
+    <!-- ══ STATUS ══ -->
+    <section class="panel" id="panel-status">
+      <div class="filter-row">
+        <button class="fpill active" onclick="App.filterStatus('all',this)">All</button>
+        <button class="fpill" onclick="App.filterStatus('good',this)">Good service</button>
+        <button class="fpill" onclick="App.filterStatus('issues',this)">Issues</button>
+      </div>
+      <div id="status-loading" class="loading-state"><div class="spinner"></div><p>Loading live status…</p></div>
+      <div id="status-list"></div>
+    </section>
+
+    <!-- ══ NEARBY ══ -->
+    <section class="panel" id="panel-nearby">
+      <div id="nearby-loading" class="loading-state"><div class="spinner"></div><p>Locating you…</p></div>
+      <div id="nearby-list"></div>
+    </section>
+
+    <!-- ══ EXPLORE ══ -->
+    <section class="panel" id="panel-explore">
+      <div class="explore-hero">
+        <h2 class="explore-title">Family London</h2>
+        <p class="explore-sub">Sights, activities &amp; day trips</p>
+      </div>
+
+      <div class="filter-row">
+        <button class="fpill active" onclick="App.filterExplore('all',this)">All</button>
+        <button class="fpill" onclick="App.filterExplore('free',this)">Free</button>
+        <button class="fpill" onclick="App.filterExplore('museum',this)">Museums</button>
+        <button class="fpill" onclick="App.filterExplore('outdoor',this)">Outdoor</button>
+        <button class="fpill" onclick="App.filterExplore('attraction',this)">Attractions</button>
+        <button class="fpill" onclick="App.filterExplore('show',this)">Shows</button>
+      </div>
+
+      <div id="explore-grid" class="explore-grid"></div>
+    </section>
+
+    <!-- ══ OYSTER ══ -->
+    <section class="panel" id="panel-oyster">
+      <div class="oyster-card">
+        <div class="oyster-header">
+          <div>
+            <p class="oyster-label">OYSTER CARD</p>
+            <p class="oyster-balance">£12.40</p>
+            <p class="oyster-note">Auto top-up active · £20 trigger</p>
+          </div>
+          <div class="oyster-chip"><div class="chip-inner"></div></div>
+        </div>
+        <div class="oyster-meta"><span>•••• 7842</span><span>Zones 1–2</span></div>
+        <button class="topup-btn" onclick="alert('Connect your TfL account in js/config.js to top up live.')">Top up now</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">14</div><div class="stat-lbl">Journeys</div></div>
+        <div class="stat-card"><div class="stat-val">£18.70</div><div class="stat-lbl">Spent</div></div>
+        <div class="stat-card"><div class="stat-val">£3.90</div><div class="stat-lbl">Cap left</div></div>
+      </div>
+      <p class="section-label">Recent journeys</p>
+      <div class="journey-list">
+        <div class="journey-item">
+          <div class="ji-icon tube-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M8 17l-2 4M16 17l2 4"/></svg></div>
+          <div class="ji-detail"><p class="ji-route">King's Cross → Paddington</p><p class="ji-meta">Today 11:32 · Elizabeth line</p></div>
+          <span class="ji-cost">£3.10</span>
+        </div>
+        <div class="journey-item">
+          <div class="ji-icon bus-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M2 10h20M7 19v1M17 19v1"/></svg></div>
+          <div class="ji-detail"><p class="ji-route">Bus 30 · Hackney Wick</p><p class="ji-meta">Today 09:15</p></div>
+          <span class="ji-cost">£1.75</span>
+        </div>
+        <div class="journey-item">
+          <div class="ji-icon tube-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M8 17l-2 4M16 17l2 4"/></svg></div>
+          <div class="ji-detail"><p class="ji-route">Paddington → Canary Wharf</p><p class="ji-meta">Yesterday 17:48 · Elizabeth line</p></div>
+          <span class="ji-cost">£2.80</span>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;padding:0 16px;line-height:1.6">Live balance &amp; journey history requires a TfL account API key set in <code>js/config.js</code>.</p>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/explore-data.js"></script>
+<script src="js/tfl.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
