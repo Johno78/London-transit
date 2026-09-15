@@ -1,14 +1,15 @@
 // Service Worker — My London Transit
 const CACHE = 'my-transit-v1';
 const STATIC = [
-  '/',
-  '/index.html',
-  '/css/app.css',
-  '/js/config.js',
-  '/js/explore-data.js',
-  '/js/tfl.js',
-  '/js/app.js',
-  '/manifest.json',
+  const STATIC = [
+  '/London-transit/',
+  '/London-transit/index.html',
+  '/London-transit/css/app.css',
+  '/London-transit/js/config.js',
+  '/London-transit/js/explore-data.js',
+  '/London-transit/js/tfl.js',
+  '/London-transit/js/app.js',
+  '/London-transit/manifest.json',
   'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap'
 ];
 
