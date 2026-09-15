@@ -2,7 +2,7 @@
   "name": "My London Transit",
   "short_name": "My Transit",
   "description": "Personal London transit app — TfL live data, line status, nearby stops, and family sightseeing guide.",
-  "start_url": "/",
+  "start_url": "/London-transit/",
   "display": "standalone",
   "background_color": "#0a0a14",
   "theme_color": "#0a0a14",
